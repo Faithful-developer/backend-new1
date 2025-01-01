@@ -7,6 +7,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 
 const app = express();
 const PORT = 3001;
+const users = [{username: 'Oygul', password: 'Urolbek', token: 'good'}];
 
 // Constants
 const TELEGRAM_BOT_TOKEN = '7974694691:AAF1y-6CFKpzhiU0sDT4btgc5yy7eL_i93g'; // Replace with your bot token
@@ -17,7 +18,8 @@ app.use('/files', express.static('files'));
 
 // Middleware
 const allowedOrigins = [
-    'https://oyguls-food.netlify.app/', // Production frontend
+    'http://localhost:3000',
+    'https://oyguls-food.netlify.app', // Production frontend
 ];
 
 app.use(cors({
@@ -51,16 +53,82 @@ const upload = multer({
 });
 
 // Routes
+app.post('/api/login', (req, res) => {
+    if (!req.body || !req.body.username || !req.body.password) {
+        return res.status(400).json({message: 'Username and password are required'});
+    }
+
+    const {username, password} = req.body;
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (user) {
+        res.json({token: user.token});
+    } else {
+        res.status(401).json({message: 'Invalid username or password'});
+    }
+});
 
 // Meals API Example
 app.get('/api/meals/:type', (req, res) => {
     const {type} = req.params;
     const meals = {
-        breakfast: [{id: 1, name: 'Pancakes', description: 'Fluffy pancakes.', price: 5, imageUrl: '/files/food.jpg'},
-            {id: 1, name: 'Pancakes', description: 'Fluffy pancakes.', price: 5, imageUrl: '/files/food.jpg'}],
-        lunch: [{id: 1, name: 'Sandwich', description: 'Turkey sandwich.', price: 7, imageUrl: '/files/food.jpg'},{ id: 1, name: 'Pancakes', description: 'Fluffy pancakes.', price: 5, imageUrl: '/files/food.jpg' }],
-        dinner: [{id: 1, name: 'Steak', description: 'Grilled steak.', price: 12, imageUrl: '/files/food.jpg'},{ id: 1, name: 'Pancakes', description: 'Fluffy pancakes.', price: 5, imageUrl: '/files/food.jpg' }],
+        breakfast: [
+            {
+                id: 1,
+                name: 'Блинчики с Нутеллой и клубникой',
+                description: 'Блинчики с Нутеллой и свежей клубникой.',
+                price: 1,
+                imageUrl: '/files/breakfast1.webp'
+            },
+            {
+                id: 2,
+                name: 'Вафли Джиотто',
+                description: 'Вафли с Нутеллой, клубникой и бананом.',
+                price: 1,
+                imageUrl: '/files/breakfast2.jpg'
+            }
+        ],
+        lunch: [
+            {
+                id: 1,
+                name: 'Куриная перзола (Диван)',
+                description: 'Куриная перзола, приготовленная в стиле Диван.',
+                price: 1,
+                imageUrl: '/files/lunch1.jpeg'
+            },
+            {
+                id: 2,
+                name: 'Донер (Донерджи Хамди Уста)',
+                description: 'Классический турецкий донер.',
+                price: 1,
+                imageUrl: '/files/lunch2.jpg'
+            },
+            {
+                id: 3,
+                name: 'Сэндвич с курицей (Сафия)',
+                description: 'Сэндвич с курицей от Сафии.',
+                price: 1,
+                imageUrl: '/files/lunch3.jpg'
+            }
+        ],
+        dinner: [
+            {
+                id: 1,
+                name: 'Турецкая баклава',
+                description: 'Аутентичная турецкая баклава.',
+                price: 1,
+                imageUrl: '/files/dinner1.jpeg'
+            },
+            {
+                id: 2,
+                name: 'Блинчики с Нутеллой и клубникой',
+                description: 'Блинчики с Нутеллой и свежей клубникой.',
+                price: 1,
+                imageUrl: '/files/breakfast1.webp'
+            }
+        ]
     };
+
 
     const mealData = meals[type];
     if (mealData) {
